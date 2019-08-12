@@ -21,7 +21,7 @@ class App {
     this.setupTimer()
     this.displayCurrentWinner()
     this.displayHighestBid()
-    this.displayBidHistory()
+    this.watchBidEvent()
   }
 
   async initWeb3 () {
@@ -55,23 +55,28 @@ class App {
     })
   }
 
-  displayBidHistory () {
+  displayBidHistory (log) {
+    const row = document.createElement('tr')
+    const bidderTd = document.createElement('td')
+    const amountTd = document.createElement('td')
+    bidderTd.textContent = log.args.bidder
+    amountTd.textContent = log.args.amount.toNumber()
+    row.append(bidderTd, amountTd)
+
+    const tbody = document.querySelector('.bid-history__table-body')
+    tbody.prepend(row)
+  }
+
+  watchBidEvent () {
     const bidEvent = this.auction.Bid({}, { fromBlock: 0, toBlock: 'latest' })
-    bidEvent.get((err, logs) => {
-      const history = logs
-        .map(log => log.args)
-        .map(args => ({ amount: args.amount.toNumber(), bidder: args.bidder }))
-      const historyHTML = history.map(event => {
-        const row = document.createElement('tr')
-        const bidderTd = document.createElement('td')
-        const amountTd = document.createElement('td')
-        bidderTd.textContent = event.bidder
-        amountTd.textContent = event.amount
-        row.append(bidderTd, amountTd)
-        return row
-      })
-      const tbody = document.querySelector('.bid-history__table-body')
-      tbody.append(...historyHTML)
+    bidEvent.watch((err, log) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      this.displayCurrentWinner()
+      this.displayHighestBid()
+      this.displayBidHistory(log)
     })
   }
 
@@ -96,6 +101,7 @@ class Timer {
   constructor(target, endTime) {
     this.target = target
     this.endTime = endTime
+    this.isTimeUp = false
   }
 
   start () {
@@ -118,6 +124,7 @@ class Timer {
     if (now > this.endTime) {
       result = '00:00:00'
       this.target.textContent = result
+      this.isTimeup = true
       this.clear()
       return
     }
