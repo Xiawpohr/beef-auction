@@ -5,6 +5,7 @@
   --address-color: #DEDA81;
   --price-color: #DEDA81;
   --button-color: #F2D850;
+  --snackbar-color: #323232;
   --table-border-color: rgba(242, 216, 80, .7);
   --border-color: linear-gradient(60deg, #D3BB3B 0%, #554D1F 20%, #A79E70 30%, #D3BB3B 70%, #F1E18A 80%, #4F4613);
 }
@@ -234,6 +235,36 @@ body {
   font-size: 20px;
 }
 
+.snackbar {
+  position: fixed;
+  top: 104px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 600px;
+  width: 80vw;
+  height: 80px;
+  padding: 0 24px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--snackbar-color);
+}
+
+.snackbar__message {
+  font-size: 20px;
+  color: white;
+}
+
+.snackbar__close {
+  font-size: 20px;
+  color: var(--button-color);
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
 /* desktop */
 @media screen and (min-width: 800px) {
   .header-text {
@@ -285,6 +316,13 @@ body {
   .bid-history__title, .bid-rules__title {
     margin-bottom: 24px;
     font-size: 24px;
- 
+  }
+
+  .snackbar__message {
+    font-size: 24px;
+  }
+
+  .snackbar__close {
+    font-size: 24px;
   }
 }

@@ -3,6 +3,7 @@ const CRYPTO_COW_ADDRESS = '0x7a2c786c8fcda3776cb01be73f184047b58e3734'
 const BEEF_AUCTION_ABI = [{"anonymous": false,"inputs": [{"indexed": true,"name": "bidder","type": "address"},{"indexed": false,"name": "amount","type": "uint256"}],"name": "Bid","type": "event"},{"constant": true,"inputs": [],"name": "currentWinner","outputs": [{"name": "","type": "address"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "endTime","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "highestBid","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
 const BEEF_AUCTION_ADDRESS = '0x2ff47352dd7ca01936fbb666f066b29f80ce10c4'
 
+
 class App {
   constructor () {
     this.bidderAddress = document.querySelector('.bidder-address')
@@ -10,6 +11,7 @@ class App {
     this.bidValue = document.querySelector('.bid-input__field')
     this.bidButton = document.querySelector('.bid-input__button')
     this.timer = new Timer(document.querySelector('.timer'))
+    this.snackbar = new Snackbar(document.querySelector('.snackbar'))
 
     this.bidButton.addEventListener('click', this.bid.bind(this))
 
@@ -25,9 +27,13 @@ class App {
   }
 
   async initWeb3 () {
-    this.web3 = await getWeb3()
-    this.cryptoCow = this.web3.eth.contract(CRYPTO_COW_ABI).at(CRYPTO_COW_ADDRESS)
-    this.auction = this.web3.eth.contract(BEEF_AUCTION_ABI).at(BEEF_AUCTION_ADDRESS)
+    try {
+      this.web3 = await getWeb3()
+      this.cryptoCow = this.web3.eth.contract(CRYPTO_COW_ABI).at(CRYPTO_COW_ADDRESS)
+      this.auction = this.web3.eth.contract(BEEF_AUCTION_ABI).at(BEEF_AUCTION_ADDRESS)
+    } catch (e) {
+      this.snackbar.show('You have to install MetaMask.')
+    }
   }
 
   setupTimer () {
@@ -92,11 +98,11 @@ class App {
   }
 }
 
+
 /**
  * @param {HTMLElement} target
  * @param {unix time} endTime
  */
-
 class Timer {
   constructor(target, endTime) {
     this.target = target
@@ -137,14 +143,47 @@ class Timer {
   }
 }
 
+
+/**
+ * @param {HTMLElement} target
+ * @param {String} defaultMessage
+ */
+class Snackbar {
+  constructor(target, defaultMessage='') {
+    this.target = target
+    this.message = target.querySelector('.snackbar__message')
+    this.closeButton = target.querySelector('.snackbar__close')
+
+    this.closeButton.addEventListener('click', this.close.bind(this))
+    this.setMessage(defaultMessage)
+    this.target.style.display = 'none'
+  }
+
+  setMessage (message) {
+    this.message.textContent = message
+  }
+
+  close () {
+    this.target.style.display = 'none'
+  }
+
+  show (message) {
+    if (message) {
+      this.setMessage(message)
+    }
+    this.target.style.display = 'flex'
+  }
+}
+
+
 async function getWeb3 () {
   if (typeof window.ethereum === undefined) {
-    console.error('You have to install MetaMask first.')
-    return
+    throw new Error('You have to install MetaMask first.')
   }
   await window.ethereum.enable()
   return window.web3
 }
+
 
 window.onload = () => {
   window.app = new App()
