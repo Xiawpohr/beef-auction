@@ -175,6 +175,21 @@ body {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   line-height: 60px;
+  display: flex;
+  align-items: center;
+  background-color: white;
+}
+
+.bid-input__field-input {
+  width: 90px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: black;
+}
+
+.bid-input__field-unit {
+  color: black;
 }
 
 .bid-input__button {
