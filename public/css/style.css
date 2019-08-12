@@ -1,0 +1,240 @@
+:root {
+  --background-color: #080202;
+  --header-color: #F64E4E;
+  --card-color: #221818;
+  --price-color: #DEDA81;
+  --button-color: #F2D850;
+  --border-color: linear-gradient(60deg, #D3BB3B 0%, #554D1F 20%, #A79E70 30%, #D3BB3B 70%, #F1E18A 80%, #4F4613);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'PingFang TC';
+}
+
+.fullscreen {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  background-color: var(--background-color);
+}
+
+.header {
+  width: 100vw;
+  height: 80px;
+  background-color: var(--header-color);
+}
+
+.header-text {
+  text-align: center;
+  line-height: 80px;
+  font-size: 24px;
+  color: white;
+  letter-spacing: 5px;
+}
+
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 48px 12px;
+  text-align: center;
+}
+
+.headline {
+  width: 300px;
+  margin-bottom: 24px;
+}
+
+.gradient-border {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 4px solid transparent;
+  background-color: var(--card-color);
+  background-clip: padding-box;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -4px;
+  border-radius: inherit;
+  background: var(--border-color);
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.xs12 {
+  flex-basis: 100%;
+  max-width: 100%;
+}
+
+.bid-lot {
+  margin: 6px;
+  padding-top: 100%;
+}
+
+.bid-lot__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#auction {
+  width: 125px;
+}
+
+#beef {
+  width: 200px;
+  margin-top: 30px; 
+}
+
+#beef-text {
+  width: 215px;
+  margin-top: 20px;
+}
+
+.bid-action {
+  margin: 6px;
+  padding-top: 100%;
+}
+
+.bid-action__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timer {
+  color: white;
+  font-size: 36px;
+}
+
+.bidder-address {
+  width: 80%;
+  word-break: break-all;
+  margin: 0 auto;
+  color: white;
+  font-size: 20px;
+}
+
+.bid-text {
+  margin: 24px auto;
+  color: white;
+  font-size: 20px;
+  letter-spacing: 5px;
+}
+
+.bidding-price {
+  color: var(--price-color);
+  font-size: 36px;
+}
+
+.bid-input {
+  display: flex;
+}
+
+.bid-input__field {
+  width: 160px;
+  height: 60px;
+  border: none;
+  padding: 0 16px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  line-height: 60px;
+}
+
+.bid-input__button {
+  width: 80px;
+  height: 60px;
+  border: none;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  color: black;
+  background-color: var(--button-color);
+}
+
+.bid-history {
+  margin: 6px;
+  flex-basis: 100%;
+  position: relative;
+  border-radius: 4px;
+  background-color: var(--card-color); 
+  color: white;
+  text-align: left;
+}
+
+/* desktop */
+@media screen and (min-width: 800px) {
+  .header-text {
+    font-size: 36px;
+  }
+
+  .headline {
+    width: 400px;
+    margin-bottom: 48px;
+  }
+
+  .md6 {
+    flex-basis: 50%;
+    max-width: 50%;
+  }
+
+  #auction {
+    width: initial;
+  }
+  
+  #beef {
+    width: initial;
+  }
+  
+  #beef-text {
+    width: initial;
+  }
+
+  .timer {
+    font-size: 48px;
+  }
+  
+  .bidder-address {
+    font-size: 24px;
+  }
+  
+  .bid-text {
+    font-size: 24px;
+  }
+  
+  .bidding-price {
+    font-size: 48px;
+  }
+}
