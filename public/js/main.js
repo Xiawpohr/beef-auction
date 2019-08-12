@@ -5,11 +5,11 @@ const BEEF_AUCTION_ADDRESS = '0x2ff47352dd7ca01936fbb666f066b29f80ce10c4'
 
 class App {
   constructor () {
-    this.timer = document.querySelector('.timer')
     this.bidderAddress = document.querySelector('.bidder-address')
     this.biddingPrice = document.querySelector('.bidding-price')
     this.bidValue = document.querySelector('.bid-input__field')
     this.bidButton = document.querySelector('.bid-input__button')
+    this.timer = new Timer(document.querySelector('.timer'))
 
     this.bidButton.addEventListener('click', this.bid.bind(this))
 
@@ -18,14 +18,25 @@ class App {
 
   async init() {
     await this.initWeb3()
+    this.setupTimer()
     this.displayCurrentWinner()
     this.displayHighestBid()
+    this.displayBidHistory()
   }
 
   async initWeb3 () {
     this.web3 = await getWeb3()
     this.cryptoCow = this.web3.eth.contract(CRYPTO_COW_ABI).at(CRYPTO_COW_ADDRESS)
     this.auction = this.web3.eth.contract(BEEF_AUCTION_ABI).at(BEEF_AUCTION_ADDRESS)
+  }
+
+  setupTimer () {
+    this.auction.endTime((err, result) => {
+      if (!err) {
+        this.timer.setEndTime(result)
+        this.timer.start()
+      }
+    })
   }
 
   displayCurrentWinner () {
@@ -44,6 +55,26 @@ class App {
     })
   }
 
+  displayBidHistory () {
+    const bidEvent = this.auction.Bid({}, { fromBlock: 0, toBlock: 'latest' })
+    bidEvent.get((err, logs) => {
+      const history = logs
+        .map(log => log.args)
+        .map(args => ({ amount: args.amount.toNumber(), bidder: args.bidder }))
+      const historyHTML = history.map(event => {
+        const row = document.createElement('tr')
+        const bidderTd = document.createElement('td')
+        const amountTd = document.createElement('td')
+        bidderTd.textContent = event.bidder
+        amountTd.textContent = event.amount
+        row.append(bidderTd, amountTd)
+        return row
+      })
+      const tbody = document.querySelector('.bid-history__table-body')
+      tbody.append(...historyHTML)
+    })
+  }
+
   async bid () {
     const data = '0x0'
     const value = parseFloat(this.bidValue.value)
@@ -53,6 +84,49 @@ class App {
         console.log('bid transaction is pending...')
       }
     })
+  }
+}
+
+/**
+ * @param {HTMLElement} target
+ * @param {unix time} endTime
+ */
+
+class Timer {
+  constructor(target, endTime) {
+    this.target = target
+    this.endTime = endTime
+  }
+
+  start () {
+    this.interval = setInterval(() => {
+      this.render()
+    }, 1000)
+  }
+
+  clear () {
+    clearInterval(this.interval)
+  }
+
+  setEndTime (endTime) {
+    this.endTime = endTime
+  }
+
+  render () {
+    let result
+    const now = Math.floor(Date.now() / 1000)
+    if (now > this.endTime) {
+      result = '00:00:00'
+      this.target.textContent = result
+      this.clear()
+      return
+    }
+    const leftSeconds = this.endTime - now
+    const hours = Math.floor(leftSeconds / 3600)
+    const minutes = Math.floor(leftSeconds / 60) % 60
+    const seconds = leftSeconds % 60
+    result = `${hours}:${minutes}:${seconds}`
+    this.target.textContent = result
   }
 }
 
