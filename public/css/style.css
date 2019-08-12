@@ -2,8 +2,10 @@
   --background-color: #080202;
   --header-color: #F64E4E;
   --card-color: #221818;
+  --address-color: #DEDA81;
   --price-color: #DEDA81;
   --button-color: #F2D850;
+  --table-border-color: rgba(242, 216, 80, .7);
   --border-color: linear-gradient(60deg, #D3BB3B 0%, #554D1F 20%, #A79E70 30%, #D3BB3B 70%, #F1E18A 80%, #4F4613);
 }
 
@@ -140,15 +142,19 @@ body {
   width: 80%;
   word-break: break-all;
   margin: 0 auto;
-  color: white;
+  color: var(--address-color);
   font-size: 20px;
 }
 
 .bid-text {
-  margin: 24px auto;
+  margin: 0 auto 8px auto;
   color: white;
   font-size: 20px;
   letter-spacing: 5px;
+}
+
+.bid-text:not(:first-child) {
+  margin-top: 32px;
 }
 
 .bidding-price {
@@ -184,14 +190,47 @@ body {
   background-color: var(--button-color);
 }
 
-.bid-history {
-  margin: 6px;
-  flex-basis: 100%;
-  position: relative;
+.bid-history, .bid-rules {
+  margin: 12px;
+  padding: 16px;
   border-radius: 4px;
   background-color: var(--card-color); 
   color: white;
   text-align: left;
+}
+
+.bid-history__title, .bid-rules__title {
+  margin-bottom: 16px;
+  color: white;
+  opacity: .7;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.bid-rules ol li {
+  margin-bottom: 8px;
+}
+
+.bid-history__table {
+  overflow: auto;
+}
+
+.bid-history__table table {
+  min-width: 100%
+}
+
+.bid-history__table th{
+  padding: 16px;
+  border-bottom: 1px solid;
+  border-color: var(--table-border-color);
+  font-size: 24px;
+}
+
+.bid-history__table td {
+  padding: 16px;
+  border-bottom: 1px solid;
+  border-color: var(--table-border-color);
+  font-size: 20px;
 }
 
 /* desktop */
@@ -236,5 +275,15 @@ body {
   
   .bidding-price {
     font-size: 48px;
+  }
+
+  .bid-history, .bid-rules {
+    padding: 24px;
+  }
+  
+  .bid-history__title, .bid-rules__title {
+    margin-bottom: 24px;
+    font-size: 24px;
+ 
   }
 }
