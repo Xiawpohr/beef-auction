@@ -57,7 +57,8 @@ class App {
   displayHighestBid () {
     this.auction.highestBid((err, result) => {
       if (!err) {
-        this.biddingPrice.textContent = `${parseFloat(result).toFixed(3)} COW`
+        const bid = parseFloat(result) / Math.pow(10, 18)
+        this.biddingPrice.textContent = `${bid.toFixed(3)} COW`
       }
     })
   }
@@ -70,14 +71,13 @@ class App {
     const etherscanLink = document.createElement('a')
     const etherscanIcon = document.createElement('img')
     bidderTd.textContent = log.args.bidder
-    amountTd.textContent = log.args.amount.toNumber()
+    amountTd.textContent = (log.args.amount.toNumber() / Math.pow(10, 18)).toFixed(3)
     etherscanIcon.src = 'img/etherscan.svg'
     etherscanIcon.width = 24
     etherscanIcon.height = 24
     etherscanLink.href = `${ETHERSCAN_DOMAIN}/tx/${log.transactionHash}`
     etherscanLink.append(etherscanIcon)
     etherscanTd.append(etherscanLink)
-
     row.append(bidderTd, amountTd, etherscanTd)
 
     const tbody = document.querySelector('.bid-history__table-body')
@@ -99,7 +99,7 @@ class App {
 
   async bid () {
     const data = '0x0'
-    const value = parseFloat(this.bidValue.value)
+    const value = parseFloat(this.bidValue.value) * Math.pow(10, 18)
     const bidderAddress = this.web3.eth.accounts[0]
     const balance = await this.getBalance()
 
