@@ -127,7 +127,7 @@ body {
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 36px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -155,7 +155,7 @@ body {
 }
 
 .bid-text:not(:first-child) {
-  margin-top: 32px;
+  margin-top: 16px;
 }
 
 .bidding-price {
@@ -233,10 +233,13 @@ body {
 }
 
 .bid-history__table table {
-  min-width: 100%
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+
 }
 
-.bid-history__table th{
+.bid-history__table th {
   padding: 16px;
   border-bottom: 1px solid;
   border-color: var(--table-border-color);
@@ -248,6 +251,7 @@ body {
   border-bottom: 1px solid;
   border-color: var(--table-border-color);
   font-size: 20px;
+  overflow: auto;
 }
 
 .snackbar {
@@ -308,6 +312,10 @@ body {
     width: initial;
   }
 
+  .bid-action__content {
+    padding: 36px;
+  }
+
   .timer {
     font-size: 48px;
   }
@@ -318,6 +326,10 @@ body {
   
   .bid-text {
     font-size: 24px;
+  }
+
+  .bid-text:not(:first-child) {
+    margin-top: 32px;
   }
   
   .bidding-price {
@@ -331,6 +343,10 @@ body {
   .bid-history__title, .bid-rules__title {
     margin-bottom: 24px;
     font-size: 24px;
+  }
+
+  .bid-history__table th:first-child {
+    width: 80%;
   }
 
   .snackbar__message {

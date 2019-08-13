@@ -1,6 +1,6 @@
-const CRYPTO_COW_ABI = [{"constant": false,"inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"},{"name": "data","type": "bytes"}],"name": "approveAndCall","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"}]
-const CRYPTO_COW_ADDRESS = '0x7a2c786c8fcda3776cb01be73f184047b58e3734'
+const CRYPTO_COW_ABI = [{"constant": false,"inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"},{"name": "data","type": "bytes"}],"name": "approveAndCall","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": true,"inputs": [{"name": "_owner","type": "address"}],"name": "balanceOf","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
 const BEEF_AUCTION_ABI = [{"anonymous": false,"inputs": [{"indexed": true,"name": "bidder","type": "address"},{"indexed": false,"name": "amount","type": "uint256"}],"name": "Bid","type": "event"},{"constant": true,"inputs": [],"name": "currentWinner","outputs": [{"name": "","type": "address"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "endTime","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "highestBid","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
+const CRYPTO_COW_ADDRESS = '0x7a2c786c8fcda3776cb01be73f184047b58e3734'
 const BEEF_AUCTION_ADDRESS = '0x2ff47352dd7ca01936fbb666f066b29f80ce10c4'
 
 
@@ -8,7 +8,7 @@ class App {
   constructor () {
     this.bidderAddress = document.querySelector('.bidder-address')
     this.biddingPrice = document.querySelector('.bidding-price')
-    this.bidValue = document.querySelector('.bid-input__field')
+    this.bidValue = document.querySelector('.bid-input__field-input')
     this.bidButton = document.querySelector('.bid-input__button')
     this.timer = new Timer(document.querySelector('.timer'))
     this.snackbar = new Snackbar(document.querySelector('.snackbar'))
@@ -32,7 +32,7 @@ class App {
       this.cryptoCow = this.web3.eth.contract(CRYPTO_COW_ABI).at(CRYPTO_COW_ADDRESS)
       this.auction = this.web3.eth.contract(BEEF_AUCTION_ABI).at(BEEF_AUCTION_ADDRESS)
     } catch (e) {
-      this.snackbar.show('You have to install MetaMask.')
+      this.snackbar.show('你需要安裝 MetaMask。')
     }
   }
 
@@ -90,10 +90,33 @@ class App {
     const data = '0x0'
     const value = parseFloat(this.bidValue.value)
     const bidderAddress = this.web3.eth.accounts[0]
+    const balance = await this.getBalance()
+
+    if (value > balance) {
+      this.snackbar.show('餘額不夠')
+      return
+    }
+    if (value < parseFloat(this.biddingPrice.textContent) * 1.1) {
+      this.snackbar.show('競標金額沒有比目前出價金額高出 1%')
+      return
+    }
+
     this.cryptoCow.approveAndCall(BEEF_AUCTION_ADDRESS, value, data, (err, result) => {
       if (!err) {
-        console.log('bid transaction is pending...')
+        this.snackbar.show('交易成功，正在等待上鏈')
       }
+    })
+  }
+
+  getBalance () {
+    return new Promise((resolve, reject) => {
+      this.cryptoCow.balanceOf(this.web3.eth.accounts[0], (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(parseFloat(result))
+        }
+      })
     })
   }
 }
