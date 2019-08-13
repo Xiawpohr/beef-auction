@@ -2,6 +2,7 @@ const CRYPTO_COW_ABI = [{"constant": false,"inputs": [{"name": "_spender","type"
 const BEEF_AUCTION_ABI = [{"anonymous": false,"inputs": [{"indexed": true,"name": "bidder","type": "address"},{"indexed": false,"name": "amount","type": "uint256"}],"name": "Bid","type": "event"},{"constant": true,"inputs": [],"name": "currentWinner","outputs": [{"name": "","type": "address"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "endTime","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "highestBid","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
 const CRYPTO_COW_ADDRESS = '0x7a2c786c8fcda3776cb01be73f184047b58e3734'
 const BEEF_AUCTION_ADDRESS = '0x2ff47352dd7ca01936fbb666f066b29f80ce10c4'
+const ETHERSCAN_DOMAIN = 'https://etherscan.io'
 
 
 class App {
@@ -65,9 +66,19 @@ class App {
     const row = document.createElement('tr')
     const bidderTd = document.createElement('td')
     const amountTd = document.createElement('td')
+    const etherscanTd = document.createElement('td')
+    const etherscanLink = document.createElement('a')
+    const etherscanIcon = document.createElement('img')
     bidderTd.textContent = log.args.bidder
     amountTd.textContent = log.args.amount.toNumber()
-    row.append(bidderTd, amountTd)
+    etherscanIcon.src = 'img/etherscan.svg'
+    etherscanIcon.width = 24
+    etherscanIcon.height = 24
+    etherscanLink.href = `${ETHERSCAN_DOMAIN}/tx/${log.transactionHash}`
+    etherscanLink.append(etherscanIcon)
+    etherscanTd.append(etherscanLink)
+
+    row.append(bidderTd, amountTd, etherscanTd)
 
     const tbody = document.querySelector('.bid-history__table-body')
     tbody.prepend(row)
