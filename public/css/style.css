@@ -6,6 +6,7 @@
   --price-color: #DEDA81;
   --button-color: #F2D850;
   --snackbar-color: #323232;
+  --link-color: #FFD5D5;
   --table-border-color: rgba(242, 216, 80, .7);
   --border-color: linear-gradient(60deg, #D3BB3B 0%, #554D1F 20%, #A79E70 30%, #D3BB3B 70%, #F1E18A 80%, #4F4613);
 }
@@ -230,6 +231,10 @@ body {
 .bid-rules ol li {
   margin-bottom: 8px;
   font-size: 20px;
+}
+
+.bid-rules a {
+  color: var(--button-color);
 }
 
 .bid-history__table {
