@@ -1,8 +1,8 @@
 const CRYPTO_COW_ABI = [{"constant": false,"inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"},{"name": "data","type": "bytes"}],"name": "approveAndCall","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": true,"inputs": [{"name": "_owner","type": "address"}],"name": "balanceOf","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
 const BEEF_AUCTION_ABI = [{"anonymous": false,"inputs": [{"indexed": true,"name": "bidder","type": "address"},{"indexed": false,"name": "amount","type": "uint256"}],"name": "Bid","type": "event"},{"constant": true,"inputs": [],"name": "currentWinner","outputs": [{"name": "","type": "address"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "endTime","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [],"name": "highestBid","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"}]
-const CRYPTO_COW_ADDRESS = '0x7a2c786c8fcda3776cb01be73f184047b58e3734'
-const BEEF_AUCTION_ADDRESS = '0x2ff47352dd7ca01936fbb666f066b29f80ce10c4'
-const ETHERSCAN_DOMAIN = 'https://rinkeby.etherscan.io'
+const CRYPTO_COW_ADDRESS = '0xFDb0065240753FEF4880a9CC7876be59E09D78BB'
+const BEEF_AUCTION_ADDRESS = '0x38fA749021D01A0dADeb5C65B34B84cbFD1Cf0AA'
+const ETHERSCAN_DOMAIN = 'https://etherscan.io'
 
 
 class App {
@@ -21,10 +21,15 @@ class App {
 
   async init() {
     await this.initWeb3()
-    this.setupTimer()
-    this.displayCurrentWinner()
-    this.displayHighestBid()
-    this.watchBidEvent()
+    const isMainNet = await this.checkWeb3Network()
+    if (isMainNet) {
+      this.setupTimer()
+      this.displayCurrentWinner()
+      this.displayHighestBid()
+      this.watchBidEvent()
+    } else {
+      this.snackbar.show('你不在以太坊主網上。')
+    }
   }
 
   async initWeb3 () {
@@ -35,6 +40,18 @@ class App {
     } catch (e) {
       this.snackbar.show('你需要安裝 MetaMask。')
     }
+  }
+  
+  checkWeb3Network () {
+    return new Promise((resolve, reject) => {
+      this.web3.version.getNetwork((err, result) => {
+        if (result !== 1) {
+          resolve(false)
+        } else {
+          resolve(true)
+        }
+      })
+    })
   }
 
   setupTimer () {
