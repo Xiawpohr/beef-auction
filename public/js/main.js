@@ -45,7 +45,7 @@ class App {
   checkWeb3Network () {
     return new Promise((resolve, reject) => {
       this.web3.version.getNetwork((err, result) => {
-        if (result !== 1) {
+        if (result !== '1') {
           resolve(false)
         } else {
           resolve(true)
