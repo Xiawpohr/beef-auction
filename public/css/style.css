@@ -206,6 +206,10 @@ body {
   background-color: var(--button-color);
 }
 
+.bid-input__button[disabled] {
+  opacity: .7;
+}
+
 .bid-history, .bid-rules {
   margin: 12px;
   padding: 16px;

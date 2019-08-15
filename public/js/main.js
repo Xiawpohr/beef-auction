@@ -39,7 +39,11 @@ class App {
 
   setupTimer () {
     this.auction.endTime((err, result) => {
-      if (!err) {
+      if (err) return 
+      if (result < Date.now()) {
+        this.snackbar.show('競標時間已截止。')
+        this.bidButton.disabled = true
+      } else {
         this.timer.setEndTime(result)
         this.timer.start()
       }
@@ -92,6 +96,7 @@ class App {
         console.error(err)
         return
       }
+      this.setupTimer()
       this.displayCurrentWinner()
       this.displayHighestBid()
       this.displayBidHistory(log)
