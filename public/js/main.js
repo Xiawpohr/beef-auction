@@ -57,7 +57,7 @@ class App {
   setupTimer () {
     this.auction.endTime((err, result) => {
       if (err) return 
-      if (result < Date.now()) {
+      if (result * 1000 < Date.now()) {
         this.snackbar.show('競標時間已截止。')
         this.bidButton.disabled = true
       } else {
