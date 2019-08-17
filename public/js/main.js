@@ -125,7 +125,11 @@ class App {
     }
 
     try {
-      await this.cryptoCow.methods.approveAndCall(BEEF_AUCTION_ADDRESS, value, data).send({ from: this.account })
+      await this.cryptoCow.methods.approveAndCall(
+        BEEF_AUCTION_ADDRESS,
+        value.times(CRYPTO_COW_DECIMAL),
+        data
+      ).send({ from: this.account })
       this.snackbar.show('交易成功，正在等待上鏈。')
     } catch (e) {
       this.snackbar.show('交易發生錯誤，請再競標一次。')
