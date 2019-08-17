@@ -3,6 +3,7 @@ const BEEF_AUCTION_ABI = [{"anonymous": false,"inputs": [{"indexed": true,"name"
 const CRYPTO_COW_ADDRESS = '0xFDb0065240753FEF4880a9CC7876be59E09D78BB'
 const BEEF_AUCTION_ADDRESS = '0x38fA749021D01A0dADeb5C65B34B84cbFD1Cf0AA'
 const ETHERSCAN_DOMAIN = 'https://etherscan.io'
+const CRYPTO_COW_DECIMAL = new BigNumber(1e+18)
 
 
 class App {
@@ -28,60 +29,45 @@ class App {
       this.displayHighestBid()
       this.watchBidEvent()
     } else {
-      this.snackbar.show('你不在以太坊主網上。')
+      this.snackbar.show('請切換到以太坊主網上。')
     }
   }
 
   async initWeb3 () {
-    try {
-      this.web3 = await getWeb3()
-      this.cryptoCow = this.web3.eth.contract(CRYPTO_COW_ABI).at(CRYPTO_COW_ADDRESS)
-      this.auction = this.web3.eth.contract(BEEF_AUCTION_ABI).at(BEEF_AUCTION_ADDRESS)
-    } catch (e) {
-      this.snackbar.show('你需要安裝 MetaMask。')
-    }
+    this.web3 = await getWeb3()
+    const accounts = await this.web3.eth.getAccounts()
+    this.account = accounts[0]
+    this.cryptoCow = new this.web3.eth.Contract(CRYPTO_COW_ABI, CRYPTO_COW_ADDRESS)
+    this.auction = new this.web3.eth.Contract(BEEF_AUCTION_ABI, BEEF_AUCTION_ADDRESS)
   }
   
-  checkWeb3Network () {
-    return new Promise((resolve, reject) => {
-      this.web3.version.getNetwork((err, result) => {
-        if (result !== '1') {
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
-    })
+  async checkWeb3Network () {
+    const networkId = await this.web3.eth.net.getId()
+    return networkId === 1
   }
 
-  setupTimer () {
-    this.auction.endTime((err, result) => {
-      if (err) return 
-      if (result * 1000 < Date.now()) {
-        this.snackbar.show('競標時間已截止。')
-        this.bidButton.disabled = true
-      } else {
-        this.timer.setEndTime(result)
-        this.timer.start()
-      }
-    })
+  async setupTimer () {
+    const endTimeRaw = await this.auction.methods.endTime().call()
+    const endTime = endTimeRaw.toNumber()
+    if (endTime * 1000 < Date.now()) {
+      this.snackbar.show('競標時間已截止。')
+      this.bidButton.disabled = true
+    } else {
+      this.timer.setEndTime(endTime)
+      this.timer.start()
+    }
   }
 
-  displayCurrentWinner () {
-    this.auction.currentWinner((err, result) => {
-      if (!err) {
-        this.bidderAddress.textContent = result
-      }
-    })
+  async displayCurrentWinner () {
+    const winner = await this.auction.methods.currentWinner().call()
+    this.bidderAddress.textContent = winner
   }
 
-  displayHighestBid () {
-    this.auction.highestBid((err, result) => {
-      if (!err) {
-        const bid = parseFloat(result) / Math.pow(10, 18)
-        this.biddingPrice.textContent = `${bid.toFixed(3)} COW`
-      }
-    })
+  async displayHighestBid () {
+    const highestBidRaw = await this.auction.methods.highestBid().call()
+    const highestBidBig = new BigNumber(highestBidRaw)
+    const hightestBid = highestBidBig.div(CRYPTO_COW_DECIMAL).toFixed(3).toString()
+    this.biddingPrice.textContent = `${hightestBid} Cow`
   }
 
   displayBidHistory (log) {
@@ -91,8 +77,8 @@ class App {
     const etherscanTd = document.createElement('td')
     const etherscanLink = document.createElement('a')
     const etherscanIcon = document.createElement('img')
-    bidderTd.textContent = log.args.bidder
-    amountTd.textContent = (log.args.amount.toNumber() / Math.pow(10, 18)).toFixed(3)
+    bidderTd.textContent = log.returnValues.bidder
+    amountTd.textContent = new BigNumber(log.returnValues.amount).div(CRYPTO_COW_DECIMAL).toFixed(3).toString()
     etherscanIcon.src = 'img/etherscan.svg'
     etherscanIcon.width = 24
     etherscanIcon.height = 24
@@ -107,12 +93,7 @@ class App {
   }
 
   watchBidEvent () {
-    const bidEvent = this.auction.Bid({}, { fromBlock: 0, toBlock: 'latest' })
-    bidEvent.watch((err, log) => {
-      if (err) {
-        console.error(err)
-        return
-      }
+    this.auction.events.Bid({ fromBlock: 0 }).on('data', (log) => {
       this.setupTimer()
       this.displayCurrentWinner()
       this.displayHighestBid()
@@ -121,37 +102,38 @@ class App {
   }
 
   async bid () {
-    const data = '0x0'
-    const value = parseFloat(this.bidValue.value) * Math.pow(10, 18)
-    const bidderAddress = this.web3.eth.accounts[0]
+    const bidderAddress = this.account
+    const value = new BigNumber(this.bidValue.value)
+    const biddingPrice = new BigNumber(parseFloat(this.biddingPrice.textContent))
     const balance = await this.getBalance()
+    const data = '0x0'
 
-    if (value > balance) {
-      this.snackbar.show('餘額不夠')
-      return
+    if (bidderAddress === undefined) {
+      this.snackbar.show('你需要安裝 MetaMask。')
+      return false
     }
-    if (value < parseFloat(this.biddingPrice.textContent) * 1.1) {
-      this.snackbar.show('競標金額沒有比目前出價金額高出 1%')
-      return
+    
+    if (value.comparedTo(balance) > 0) {
+      this.snackbar.show('餘額不夠。')
+      return false
     }
 
-    this.cryptoCow.approveAndCall(BEEF_AUCTION_ADDRESS, value, data, (err, result) => {
-      if (!err) {
-        this.snackbar.show('交易成功，正在等待上鏈')
-      }
-    })
+    if (value.comparedTo(biddingPrice.times(1.1)) < 0) {
+      this.snackbar.show('競標金額沒有比目前出價金額高出 1%。')
+      return false
+    }
+
+    try {
+      await this.cryptoCow.methods.approveAndCall(BEEF_AUCTION_ADDRESS, value, data).send({ from: this.account })
+      this.snackbar.show('交易成功，正在等待上鏈。')
+    } catch (e) {
+      this.snackbar.show('交易發生錯誤，請再競標一次。')
+    }
   }
 
-  getBalance () {
-    return new Promise((resolve, reject) => {
-      this.cryptoCow.balanceOf(this.web3.eth.accounts[0], (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(parseFloat(result))
-        }
-      })
-    })
+  async getBalance () {
+    const balance = await this.cryptoCow.methods.balanceOf(this.account).call()
+    return new BigNumber(balance).div(CRYPTO_COW_DECIMAL)
   }
 }
 
@@ -234,11 +216,15 @@ class Snackbar {
 
 
 async function getWeb3 () {
+  let provider
   if (typeof window.ethereum === undefined) {
-    throw new Error('You have to install MetaMask first.')
+    provider = new Web3.provider.WebsocketProvider('wws://mainnet.infura.io/ws/v3/80efc64952264763bcd9a294113d7450')
+  } else {
+    console.log('hello')
+    await window.ethereum.enable()
+    provider = window.web3.currentProvider
   }
-  await window.ethereum.enable()
-  return window.web3
+  return new Web3(provider)
 }
 
 
