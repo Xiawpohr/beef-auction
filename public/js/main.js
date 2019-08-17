@@ -4,6 +4,7 @@ const CRYPTO_COW_ADDRESS = '0xFDb0065240753FEF4880a9CC7876be59E09D78BB'
 const BEEF_AUCTION_ADDRESS = '0x38fA749021D01A0dADeb5C65B34B84cbFD1Cf0AA'
 const ETHERSCAN_DOMAIN = 'https://etherscan.io'
 const CRYPTO_COW_DECIMAL = new BigNumber(1e+18)
+BigNumber.config({ RANGE: [-19, 61], EXPONENTIAL_AT: [-19, 61] })
 
 
 class App {
@@ -211,6 +212,7 @@ class Snackbar {
       this.setMessage(message)
     }
     this.target.style.display = 'flex'
+    setTimeout(() => { this.close() }, 5000)
   }
 }
 
