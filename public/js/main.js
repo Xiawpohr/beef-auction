@@ -127,7 +127,7 @@ class App {
     try {
       await this.cryptoCow.methods.approveAndCall(
         BEEF_AUCTION_ADDRESS,
-        value.times(CRYPTO_COW_DECIMAL),
+        value.times(CRYPTO_COW_DECIMAL).toString(),
         data
       ).send({ from: this.account })
       this.snackbar.show('交易成功，正在等待上鏈。')
@@ -226,7 +226,6 @@ async function getWeb3 () {
   if (typeof window.ethereum === undefined) {
     provider = new Web3.provider.WebsocketProvider('wws://mainnet.infura.io/ws/v3/80efc64952264763bcd9a294113d7450')
   } else {
-    console.log('hello')
     await window.ethereum.enable()
     provider = window.web3.currentProvider
   }
