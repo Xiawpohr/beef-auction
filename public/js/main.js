@@ -223,11 +223,11 @@ class Snackbar {
 
 async function getWeb3 () {
   let provider
-  if (typeof window.ethereum === undefined) {
-    provider = new Web3.provider.WebsocketProvider('wws://mainnet.infura.io/ws/v3/80efc64952264763bcd9a294113d7450')
-  } else {
+  if (window.ethereum) {
     await window.ethereum.enable()
     provider = window.web3.currentProvider
+  } else {
+    provider = new Web3.providers.WebsocketProvider('wss://mainnet.infura.io/ws/v3/80efc64952264763bcd9a294113d7450')
   }
   return new Web3(provider)
 }
