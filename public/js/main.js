@@ -21,92 +21,11 @@ class App {
     this.init()
   }
 
-  async init() {
-    await this.initWeb3()
-    const isMainNet = await this.checkWeb3Network()
-    if (isMainNet) {
-      this.setupTimer()
-      this.displayCurrentWinner()
-      this.displayHighestBid()
-      this.watchBidEvent()
-    } else {
-      this.snackbar.show('請切換到以太坊主網上。')
-    }
-  }
-
-  async initWeb3 () {
-    this.web3 = await getWeb3()
-    const accounts = await this.web3.eth.getAccounts()
-    this.account = accounts[0]
-    this.cryptoCow = new this.web3.eth.Contract(CRYPTO_COW_ABI, CRYPTO_COW_ADDRESS)
-    this.auction = new this.web3.eth.Contract(BEEF_AUCTION_ABI, BEEF_AUCTION_ADDRESS)
-  }
-  
-  async checkWeb3Network () {
-    const networkId = await this.web3.eth.net.getId()
-    return networkId === 1
-  }
-
-  async setupTimer () {
-    const endTimeRaw = await this.auction.methods.endTime().call()
-    const endTime = endTimeRaw.toNumber()
-    if (endTime * 1000 < Date.now()) {
-      this.snackbar.show('競標時間已截止。')
-      this.bidButton.disabled = true
-    } else {
-      this.timer.setEndTime(endTime)
-      this.timer.start()
-    }
-  }
-
-  async displayCurrentWinner () {
-    const winner = await this.auction.methods.currentWinner().call()
-    this.bidderAddress.textContent = winner
-  }
-
-  async displayHighestBid () {
-    const highestBidRaw = await this.auction.methods.highestBid().call()
-    const highestBidBig = new BigNumber(highestBidRaw)
-    const hightestBid = highestBidBig.div(CRYPTO_COW_DECIMAL).toFixed(3).toString()
-    this.biddingPrice.textContent = `${hightestBid} Cow`
-  }
-
-  displayBidHistory (log) {
-    const row = document.createElement('tr')
-    const bidderTd = document.createElement('td')
-    const amountTd = document.createElement('td')
-    const etherscanTd = document.createElement('td')
-    const etherscanLink = document.createElement('a')
-    const etherscanIcon = document.createElement('img')
-    bidderTd.textContent = log.returnValues.bidder
-    amountTd.textContent = new BigNumber(log.returnValues.amount).div(CRYPTO_COW_DECIMAL).toFixed(3).toString()
-    etherscanIcon.src = 'img/etherscan.svg'
-    etherscanIcon.width = 24
-    etherscanIcon.height = 24
-    etherscanLink.href = `${ETHERSCAN_DOMAIN}/tx/${log.transactionHash}`
-    etherscanLink.target = '_blank'
-    etherscanLink.append(etherscanIcon)
-    etherscanTd.append(etherscanLink)
-    row.append(bidderTd, amountTd, etherscanTd)
-
-    const tbody = document.querySelector('.bid-history__table-body')
-    tbody.prepend(row)
-  }
-
-  watchBidEvent () {
-    this.auction.events.Bid({ fromBlock: 0 }).on('data', (log) => {
-      this.setupTimer()
-      this.displayCurrentWinner()
-      this.displayHighestBid()
-      this.displayBidHistory(log)
-    })
-  }
-
   async bid () {
     const bidderAddress = this.account
     const value = new BigNumber(this.bidValue.value)
     const biddingPrice = new BigNumber(parseFloat(this.biddingPrice.textContent))
-    const balance = await this.getBalance()
+    const balance = await this._getBalance()
     const data = '0x0'
 
     if (bidderAddress === undefined) {
@@ -136,7 +55,92 @@ class App {
     }
   }
 
-  async getBalance () {
+  async init() {
+    await this._initWeb3()
+    const isMainNet = await this._checkWeb3Network()
+    if (isMainNet) {
+      this._setupTimer()
+      this._displayCurrentWinner()
+      this._displayHighestBid()
+      this._watchBidEvent()
+    } else {
+      this.snackbar.show('請切換到以太坊主網上。')
+    }
+  }
+
+  /**
+   * Private Methods
+   */
+
+  async _initWeb3 () {
+    this.web3 = await getWeb3()
+    const accounts = await this.web3.eth.getAccounts()
+    this.account = accounts[0]
+    this.cryptoCow = new this.web3.eth.Contract(CRYPTO_COW_ABI, CRYPTO_COW_ADDRESS)
+    this.auction = new this.web3.eth.Contract(BEEF_AUCTION_ABI, BEEF_AUCTION_ADDRESS)
+  }
+  
+  async _checkWeb3Network () {
+    const networkId = await this.web3.eth.net.getId()
+    return networkId === 1
+  }
+
+  async _setupTimer () {
+    const endTimeRaw = await this.auction.methods.endTime().call()
+    const endTime = parseInt(endTimeRaw)
+    if (endTime * 1000 < Date.now()) {
+      this.snackbar.show('競標時間已截止。')
+      this.bidButton.disabled = true
+    } else {
+      this.timer.setEndTime(endTime)
+      this.timer.start()
+    }
+  }
+
+  async _displayCurrentWinner () {
+    const winner = await this.auction.methods.currentWinner().call()
+    this.bidderAddress.textContent = winner
+  }
+
+  async _displayHighestBid () {
+    const highestBidRaw = await this.auction.methods.highestBid().call()
+    const highestBidBig = new BigNumber(highestBidRaw)
+    const hightestBid = highestBidBig.div(CRYPTO_COW_DECIMAL).toFixed(3)
+    this.biddingPrice.textContent = `${hightestBid} Cow`
+  }
+
+  _displayBidHistory (log) {
+    const row = document.createElement('tr')
+    const bidderTd = document.createElement('td')
+    const amountTd = document.createElement('td')
+    const etherscanTd = document.createElement('td')
+    const etherscanLink = document.createElement('a')
+    const etherscanIcon = document.createElement('img')
+    bidderTd.textContent = log.returnValues.bidder
+    amountTd.textContent = new BigNumber(log.returnValues.amount).div(CRYPTO_COW_DECIMAL).toFixed(3)
+    etherscanIcon.src = 'img/etherscan.svg'
+    etherscanIcon.width = 24
+    etherscanIcon.height = 24
+    etherscanLink.href = `${ETHERSCAN_DOMAIN}/tx/${log.transactionHash}`
+    etherscanLink.target = '_blank'
+    etherscanLink.append(etherscanIcon)
+    etherscanTd.append(etherscanLink)
+    row.append(bidderTd, amountTd, etherscanTd)
+
+    const tbody = document.querySelector('.bid-history__table-body')
+    tbody.prepend(row)
+  }
+
+  _watchBidEvent () {
+    this.auction.events.Bid({ fromBlock: 0 }).on('data', (log) => {
+      this._setupTimer()
+      this._displayCurrentWinner()
+      this._displayHighestBid()
+      this._displayBidHistory(log)
+    })
+  }
+
+  async _getBalance () {
     const balance = await this.cryptoCow.methods.balanceOf(this.account).call()
     return new BigNumber(balance).div(CRYPTO_COW_DECIMAL)
   }
@@ -225,6 +229,8 @@ async function getWeb3 () {
   let provider
   if (window.ethereum) {
     await window.ethereum.enable()
+    provider = window.web3.currentProvider
+  } else if (window.web3) {
     provider = window.web3.currentProvider
   } else {
     provider = new Web3.providers.WebsocketProvider('wss://mainnet.infura.io/ws/v3/80efc64952264763bcd9a294113d7450')
