@@ -38,7 +38,7 @@ class App {
       return false
     }
 
-    if (value.comparedTo(biddingPrice.times(1.1)) < 0) {
+    if (value.comparedTo(biddingPrice.times(1.01)) < 0) {
       this.snackbar.show('競標金額沒有比目前出價金額高出 1%。')
       return false
     }
